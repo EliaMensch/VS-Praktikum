@@ -13,6 +13,8 @@ public class Main21 {
 
 		p2.fromByteArray(barr);
 		System.out.println(p2.getGanzzahl());
+		
+		System.out.println("test2");
 
 	}
 
