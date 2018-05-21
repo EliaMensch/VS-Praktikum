@@ -15,6 +15,7 @@ public class Main21 {
 		System.out.println(p2.getGanzzahl());
 		
 		System.out.println("test2");
+		System.out.println("test3");
 
 	}
 
