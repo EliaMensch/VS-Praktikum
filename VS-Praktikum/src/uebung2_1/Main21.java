@@ -5,7 +5,6 @@ import java.util.Calendar;
 public class Main21 {
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 		Person p1 = new Person("Paul", Calendar.getInstance(), 1237628451l);
 		Person p2 = new Person();
