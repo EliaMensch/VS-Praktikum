@@ -16,6 +16,7 @@ public class Main21 {
 		
 		System.out.println("test2");
 		System.out.println("test3");
+		System.out.println("test7");
 		System.out.println("GIT ist super!!");
 
 	}
