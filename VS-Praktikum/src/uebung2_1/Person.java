@@ -1,6 +1,7 @@
 package uebung2_1;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class Person {
 
@@ -13,10 +14,12 @@ public class Person {
 	private int index;
 
 	public Person(String personenname, Calendar geburtstag, long ganzzahl) {
+
 		setPersonenname(personenname);
 		setGeburtstag(geburtstag);
 		setGanzzahl(ganzzahl);
 		this.index = 0;
+
 	}
 
 	public Person() {
@@ -51,90 +54,115 @@ public class Person {
 		this.ganzzahl = ganzzahl;
 	}
 
+	private int getStreamLength() {
+
+		// Länge der Ganzzahl
+		int length = Long.BYTES;
+
+		// Länge des Geburtstages
+		length += Integer.BYTES * 3;
+		length += Integer.BYTES + geburtstag.getTimeZone().getID().length() * Character.BYTES;
+
+		// Länge des Personennamens
+		length += Integer.BYTES + personenname.length() * Character.BYTES;
+
+		return length;
+
+	}
+
 	public byte[] toByteArray() {
 
-		byte[] stream = new byte[Long.BYTES + 3 * Integer.BYTES + Integer.BYTES
-				+ personenname.length() * Character.BYTES];
+		byte[] stream = new byte[getStreamLength()];
 
-		addGanzzahlToByteStream(stream);
-		addGeburtstagToStream(stream);
-		addPersonennameToStream(stream);
+		this.index = 0;
+
+		addLongToStream(stream, ganzzahl);
+		addCalendarToStream(stream, geburtstag);
+		addStringToStream(stream, personenname);
+
+		this.index = 0;
 
 		return stream;
 
 	}
 
-	private void addGanzzahlToByteStream(byte[] stream) {
-
-		long ganzzahlHelper = ganzzahl;
+	private void addLongToStream(byte[] stream, long val) {
 
 		for (int i = 0; i < Long.BYTES; i++) {
 
-			stream[i] = (byte) ((ganzzahlHelper % SIZE_OF_BYTE) - SIGN_BYTE);
+			stream[this.index + i] = (byte) ((val % SIZE_OF_BYTE) - SIGN_BYTE);
 
-			ganzzahlHelper /= SIZE_OF_BYTE;
-
-		}
-
-	}
-
-	private void addGeburtstagToStream(byte[] stream) {
-
-		int[] date = { geburtstag.get(Calendar.YEAR), geburtstag.get(Calendar.MONTH),
-				geburtstag.get(Calendar.DAY_OF_MONTH) };
-
-		for (int i = 0; i < date.length; i++) {
-
-			for (int j = 0; j < Integer.BYTES; j++) {
-
-				stream[Long.BYTES + i * Integer.BYTES + j] = (byte) ((date[i] % SIZE_OF_BYTE) - SIGN_BYTE);
-
-				date[i] /= SIZE_OF_BYTE;
-
-			}
+			val /= SIZE_OF_BYTE;
 
 		}
 
+		this.index += Long.BYTES;
+
 	}
 
-	private void addPersonennameToStream(byte[] stream) {
-
-		int length = personenname.length();
+	private void addIntegerToStream(byte[] stream, int val) {
 
 		for (int i = 0; i < Integer.BYTES; i++) {
 
-			stream[Long.BYTES + 3 * Integer.BYTES + i] = (byte) ((length % SIZE_OF_BYTE) - SIGN_BYTE);
+			stream[this.index + i] = (byte) ((val % SIZE_OF_BYTE) - SIGN_BYTE);
 
-			length /= SIZE_OF_BYTE;
+			val /= SIZE_OF_BYTE;
+
+		}
+
+		this.index += Integer.BYTES;
+
+	}
+
+	private void addCharacterToStream(byte[] stream, char c) {
+
+		for (int i = 0; i < Character.BYTES; i++) {
+
+			stream[this.index + i] = (byte) ((c % SIZE_OF_BYTE) - SIGN_BYTE);
+
+			c /= SIZE_OF_BYTE;
 
 		}
 
-		for (int i = 0; i < personenname.length(); i++) {
+		this.index += Character.BYTES;
 
-			char c = personenname.charAt(i);
+	}
 
-			for (int j = 0; j < Character.BYTES; j++) {
+	private void addStringToStream(byte[] stream, String s) {
 
-				stream[Long.BYTES + 3 * Integer.BYTES + Integer.BYTES + i * Character.BYTES
-						+ j] = (byte) ((c % SIZE_OF_BYTE) - SIGN_BYTE);
+		addIntegerToStream(stream, s.length());
 
-				c /= SIZE_OF_BYTE;
+		for (int i = 0; i < s.length(); i++) {
 
-			}
+			addCharacterToStream(stream, s.charAt(i));
 
 		}
+
+	}
+
+	private void addCalendarToStream(byte[] stream, Calendar cal) {
+
+		addIntegerToStream(stream, cal.get(Calendar.YEAR));
+		addIntegerToStream(stream, cal.get(Calendar.MONTH));
+		addIntegerToStream(stream, cal.get(Calendar.DAY_OF_MONTH));
+
+		addStringToStream(stream, cal.getTimeZone().getID());
 
 	}
 
 	public void fromByteArray(byte[] stream) {
 
+		this.index = 0;
+
 		setGanzzahl(fetchLongFromStream(stream));
-		setGeburtstag(fetchGeburtstagFromStream(stream));
+		setGeburtstag(fetchCalendarFromStream(stream));
 		setPersonenname(fetchStringFromStream(stream));
+
+		this.index = 0;
 
 	}
 
-	private Calendar fetchGeburtstagFromStream(byte[] stream) {
+	private Calendar fetchCalendarFromStream(byte[] stream) {
 
 		Calendar gbt = Calendar.getInstance();
 
@@ -147,6 +175,8 @@ public class Person {
 		}
 
 		gbt.set(date[0], date[1], date[2]);
+
+		gbt.setTimeZone(TimeZone.getTimeZone(fetchStringFromStream(stream)));
 
 		return gbt;
 
@@ -165,7 +195,7 @@ public class Person {
 			}
 
 		}
-		
+
 		this.index += Integer.BYTES;
 
 		return val;
@@ -185,7 +215,7 @@ public class Person {
 			}
 
 		}
-		
+
 		this.index += Long.BYTES;
 
 		return val;
@@ -220,7 +250,7 @@ public class Person {
 			}
 
 		}
-		
+
 		this.index += Character.BYTES;
 
 		return c;
@@ -236,7 +266,7 @@ public class Person {
 		sb.append("\nGeburtstag:\t");
 		sb.append(geburtstag.get(Calendar.DAY_OF_MONTH));
 		sb.append(".");
-		sb.append(geburtstag.get(Calendar.MONTH));
+		sb.append(String.format("%02d", geburtstag.get(Calendar.MONTH) + 1));
 		sb.append(".");
 		sb.append(geburtstag.get(Calendar.YEAR));
 		sb.append("\t");
