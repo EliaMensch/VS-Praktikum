@@ -10,15 +10,17 @@ public class Person {
 
 	private final int SIGN_BYTE = 128;
 	private final int SIZE_OF_BYTE = 256;
+	private int index;
 
 	public Person(String personenname, Calendar geburtstag, long ganzzahl) {
 		setPersonenname(personenname);
 		setGeburtstag(geburtstag);
 		setGanzzahl(ganzzahl);
+		this.index = 0;
 	}
 
 	public Person() {
-		this("Mustermann", Calendar.getInstance(), 12l);
+		this("Mustermann", Calendar.getInstance(), 42l);
 	}
 
 	public String getPersonenname() {
@@ -126,9 +128,9 @@ public class Person {
 
 	public void fromByteArray(byte[] stream) {
 
-		setGanzzahl(fetchLongFromStream(stream, 0));
+		setGanzzahl(fetchLongFromStream(stream));
 		setGeburtstag(fetchGeburtstagFromStream(stream));
-		setPersonenname(fetchStringFromStream(stream, Long.BYTES + 3 * Integer.BYTES));
+		setPersonenname(fetchStringFromStream(stream));
 
 	}
 
@@ -140,7 +142,7 @@ public class Person {
 
 		for (int i = 0; i < date.length; i++) {
 
-			date[i] = fetchIntegerFromStream(stream, Long.BYTES + i * Integer.BYTES);
+			date[i] = fetchIntegerFromStream(stream);
 
 		}
 
@@ -150,50 +152,54 @@ public class Person {
 
 	}
 
-	private int fetchIntegerFromStream(byte[] stream, int index) {
+	private int fetchIntegerFromStream(byte[] stream) {
 
 		int val = 0;
 
 		for (int i = Integer.BYTES - 1; i >= 0; i--) {
 
-			val += stream[index + i] + SIGN_BYTE;
+			val += stream[this.index + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				val *= SIZE_OF_BYTE;
 			}
 
 		}
+		
+		this.index += Integer.BYTES;
 
 		return val;
 
 	}
 
-	private long fetchLongFromStream(byte[] stream, int index) {
+	private long fetchLongFromStream(byte[] stream) {
 
 		long val = 0;
 
 		for (int i = Long.BYTES - 1; i >= 0; i--) {
 
-			val += stream[index + i] + SIGN_BYTE;
+			val += stream[this.index + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				val *= SIZE_OF_BYTE;
 			}
 
 		}
+		
+		this.index += Long.BYTES;
 
 		return val;
 
 	}
 
-	private String fetchStringFromStream(byte[] stream, int index) {
+	private String fetchStringFromStream(byte[] stream) {
 
 		StringBuilder sb = new StringBuilder();
-		int length = fetchIntegerFromStream(stream, index);
+		int length = fetchIntegerFromStream(stream);
 
 		for (int i = 0; i < length; i++) {
 
-			sb.append(fetchCharFromStream(stream, index + Integer.BYTES + i * Character.BYTES));
+			sb.append(fetchCharFromStream(stream));
 
 		}
 
@@ -201,19 +207,21 @@ public class Person {
 
 	}
 
-	private char fetchCharFromStream(byte[] stream, int index) {
+	private char fetchCharFromStream(byte[] stream) {
 
 		char c = 0;
 
 		for (int i = Character.BYTES - 1; i >= 0; i--) {
 
-			c += stream[index + i] + SIGN_BYTE;
+			c += stream[this.index + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				c *= SIZE_OF_BYTE;
 			}
 
 		}
+		
+		this.index += Character.BYTES;
 
 		return c;
 
@@ -231,6 +239,8 @@ public class Person {
 		sb.append(geburtstag.get(Calendar.MONTH));
 		sb.append(".");
 		sb.append(geburtstag.get(Calendar.YEAR));
+		sb.append("\t");
+		sb.append(geburtstag.getTimeZone().getID());
 		sb.append("\nGanzzahl:\t");
 		sb.append(ganzzahl);
 
