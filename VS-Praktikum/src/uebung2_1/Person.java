@@ -124,7 +124,7 @@ public class Person {
 			c /= SIZE_OF_BYTE;
 
 		}
-
+//w00t
 		index.setIndex(index.getIndex()+ Character.BYTES); 
 
 	}
