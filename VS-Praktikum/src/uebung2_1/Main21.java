@@ -22,13 +22,15 @@ public class Main21 {
 		System.out.println(p2.toString());
 
 		byte[] barr = p1.toByteArray();
-
-		p2.fromByteArray(barr);
+		
+		Person p3 = Person.fromByteArray(barr);
+		
+		
 		System.out.println();
 		System.out.println("Serialisierte Person");
 	
 		System.out.println();
-		System.out.println(p2.toString());
+		System.out.println(p3.toString());
 
 	}
 

@@ -9,8 +9,8 @@ public class Person {
 	private Calendar geburtstag;
 	private long ganzzahl;
 
-	private final int SIGN_BYTE = 128;
-	private final int SIZE_OF_BYTE = 256;
+	private static  final int SIGN_BYTE = 128;
+	private static final int SIZE_OF_BYTE = 256;
 
 
 	public Person(String personenname, Calendar geburtstag, long ganzzahl) {
@@ -129,67 +129,66 @@ public class Person {
 
 	}
 
-	private void addStringToStream(byte[] stream, String s) {
+	private static void addStringToStream(byte[] stream, String s, Pointer index) {
 
-		addIntegerToStream(stream, s.length());
+		addIntegerToStream(stream, s.length(), index);
 
 		for (int i = 0; i < s.length(); i++) {
 
-			addCharacterToStream(stream, s.charAt(i));
+			addCharacterToStream(stream, s.charAt(i), index);
 
 		}
 
 	}
 
-	private void addCalendarToStream(byte[] stream, Calendar cal) {
+	private static void addCalendarToStream(byte[] stream, Calendar cal, Pointer index) {
 
-		addIntegerToStream(stream, cal.get(Calendar.YEAR));
-		addIntegerToStream(stream, cal.get(Calendar.MONTH));
-		addIntegerToStream(stream, cal.get(Calendar.DAY_OF_MONTH));
+		addIntegerToStream(stream, cal.get(Calendar.YEAR), index);
+		addIntegerToStream(stream, cal.get(Calendar.MONTH), index);
+		addIntegerToStream(stream, cal.get(Calendar.DAY_OF_MONTH), index);
 
-		addStringToStream(stream, cal.getTimeZone().getID());
+		addStringToStream(stream, cal.getTimeZone().getID(), index);
 
 	}
 
-	public Person fromByteArray(byte[] stream) {
-		Person x = new Person();
-		//this.index = 0;
+	public static Person fromByteArray(byte[] stream) {
 
-		long gz = fetchLongFromStream(stream);
-		setGeburtstag(fetchCalendarFromStream(stream));
-		setPersonenname(fetchStringFromStream(stream));
+		Pointer index = new Pointer(0);
 
-		this.index = 0;
-return 0;
+		long gz = fetchLongFromStream(stream, index);
+		Calendar cal = fetchCalendarFromStream(stream, index);
+		String s = fetchStringFromStream(stream, index);
+		
+return new Person(s, cal, gz);
 	}
 
-	private Calendar fetchCalendarFromStream(byte[] stream) {
+	private static Calendar fetchCalendarFromStream(byte[] stream, Pointer index) {
 
-		Calendar gbt = Calendar.getInstance();
+		Calendar cal = Calendar.getInstance();
 
 		int[] date = { 0, 0, 0 };
 
 		for (int i = 0; i < date.length; i++) {
 
-			date[i] = fetchIntegerFromStream(stream);
+			date[i] = fetchIntegerFromStream(stream, index);
 		
 		}
 
-		gbt.set(date[0], date[1], date[2]);
+		cal.set(date[0], date[1], date[2]);
 
-		gbt.setTimeZone(TimeZone.getTimeZone(fetchStringFromStream(stream)));
+		cal.setTimeZone(TimeZone.getTimeZone(fetchStringFromStream(stream, index)));
 
-		return gbt;
+		return cal;
 
 	}
 
-	private int fetchIntegerFromStream(byte[] stream) {
+	private static int fetchIntegerFromStream(byte[] stream, Pointer index) {
 
 		int val = 0;
 
 		for (int i = Integer.BYTES - 1; i >= 0; i--) {
 
-			val += stream[this.index + i] + SIGN_BYTE;
+			val += stream[index.getIndex() + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				val *= SIZE_OF_BYTE;
@@ -197,19 +196,19 @@ return 0;
 
 		}
 
-		this.index += Integer.BYTES;
+		index.setIndex(index.getIndex()+ Integer.BYTES); 
 
 		return val;
 
 	}
 
-	private long fetchLongFromStream(byte[] stream) {
+	private static long fetchLongFromStream(byte[] stream, Pointer index) {
 
 		long val = 0;
 
 		for (int i = Long.BYTES - 1; i >= 0; i--) {
 
-			val += stream[this.index + i] + SIGN_BYTE;
+			val += stream[index.getIndex() + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				val *= SIZE_OF_BYTE;
@@ -217,20 +216,20 @@ return 0;
 
 		}
 
-		this.index += Long.BYTES;
+		index.setIndex(index.getIndex()+Long.BYTES);
 
 		return val;
 
 	}
 
-	private String fetchStringFromStream(byte[] stream) {
+	private static String fetchStringFromStream(byte[] stream, Pointer index) {
 
 		StringBuilder sb = new StringBuilder();
-		int length = fetchIntegerFromStream(stream);
+		int length = fetchIntegerFromStream(stream, index);
 
 		for (int i = 0; i < length; i++) {
 
-			sb.append(fetchCharFromStream(stream));
+			sb.append(fetchCharFromStream(stream, index));
 
 		}
 
@@ -238,13 +237,13 @@ return 0;
 
 	}
 
-	private char fetchCharFromStream(byte[] stream) {
+	private static char fetchCharFromStream(byte[] stream, Pointer index) {
 
 		char c = 0;
 
 		for (int i = Character.BYTES - 1; i >= 0; i--) {
 
-			c += stream[this.index + i] + SIGN_BYTE;
+			c += stream[index.getIndex() + i] + SIGN_BYTE;
 
 			if (i != 0) {
 				c *= SIZE_OF_BYTE;
@@ -252,7 +251,7 @@ return 0;
 
 		}
 
-		this.index += Character.BYTES;
+		index.setIndex(index.getIndex()+Character.BYTES);
 
 		return c;
 
