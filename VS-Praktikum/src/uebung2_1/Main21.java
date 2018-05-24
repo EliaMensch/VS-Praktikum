@@ -24,7 +24,9 @@ public class Main21 {
 		byte[] barr = p1.toByteArray();
 
 		p2.fromByteArray(barr);
-
+		System.out.println();
+		System.out.println("Serialisierte Person");
+	
 		System.out.println();
 		System.out.println(p2.toString());
 
