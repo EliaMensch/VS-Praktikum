@@ -2,15 +2,14 @@ package uebung2_2;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
-public class Main22 {
+public class Main22_1 {
 
 	public static void main(String[] args) {
-		
+
 		ArrayList<String> resources = new ArrayList<String>();
-		
+
 		resources.add("intro.pdf");
 		resources.add("index.html");
 		resources.add("d41d8cd98f00b204e9800998ecf8427e");
@@ -23,51 +22,50 @@ public class Main22 {
 		resources.add("10af8b96-bf4a-4567-9cf4-56646cfefb23");
 		resources.add("cb4c2299-be2b-4673-ae76-0e98d1539833");
 		resources.add("c01c429b-5a55-4930-be48-8b0e2ae4db5d");
-		
+
 		ArrayList<String> server = new ArrayList<String>();
-		
+
 		server.add("s1.example.com");
 		server.add("s2.example.com");
 		server.add("s3.example.com");
-		
+
 		LinkedHashMap<String, String> modulusList = new LinkedHashMap<String, String>();
-		
-		for(int i = 0; i < resources.size(); i++) {
-			
+
+		for (int i = 0; i < resources.size(); i++) {
+
 			modulusList.put(resources.get(i), server.get(i % server.size()));
-			
+
 		}
-		
+
 		System.out.println(mapToString(modulusList));
-	
+
 	}
-	
-	public static String mapToString(LinkedHashMap map) {
-		
+
+	public static String mapToString(LinkedHashMap<String, String> map) {
+
 		StringBuffer sb = new StringBuffer();
-		
+
 		Set<String> keys = map.keySet();
-		
-		for(String k : keys) {
-			
+
+		for (String k : keys) {
+
 			sb.append(k);
-			
+
 			int tabs = (int) Math.ceil((6 * 8.0 - k.length()) / 8);
-			
+
 			for (int i = 0; i < tabs; i++) {
-				
+
 				sb.append("\t");
-				
+
 			}
-			
+
 			sb.append(map.get(k));
 			sb.append("\n");
-			
+
 		}
-		
+
 		return sb.toString();
-		
+
 	}
 
 }
- 
