@@ -2,28 +2,37 @@ package uebung2_1;
 
 import java.util.Calendar;
 import java.util.TimeZone;
+import java.util.logging.Logger;
 
 public class Person {
 
 	private String personenname;
 	private Calendar geburtstag;
 	private long ganzzahl;
+	private transient Logger logger;
 
-	private static  final int SIGN_BYTE = 128;
+	private static final int SIGN_BYTE = 128;
 	private static final int SIZE_OF_BYTE = 256;
-
 
 	public Person(String personenname, Calendar geburtstag, long ganzzahl) {
 
 		setPersonenname(personenname);
 		setGeburtstag(geburtstag);
 		setGanzzahl(ganzzahl);
-	
+		setLogger(Logger.getLogger(personenname.substring(0, 10) + "_Logger"));
 
 	}
 
 	public Person() {
 		this("Mustermann", Calendar.getInstance(), 42l);
+	}
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	public void setLogger(Logger logger) {
+		this.logger = logger;
 	}
 
 	public String getPersonenname() {
@@ -74,13 +83,11 @@ public class Person {
 
 		byte[] stream = new byte[getStreamLength()];
 
-				Pointer index = new Pointer(0);
+		Pointer index = new Pointer(0);
 
 		addLongToStream(stream, ganzzahl, index);
 		addCalendarToStream(stream, geburtstag, index);
 		addStringToStream(stream, personenname, index);
-
-		
 
 		return stream;
 
@@ -96,7 +103,7 @@ public class Person {
 
 		}
 
-		index.setIndex(index.getIndex()+ Long.BYTES); 
+		index.setIndex(index.getIndex() + Long.BYTES);
 
 	}
 
@@ -110,7 +117,7 @@ public class Person {
 
 		}
 
-		index.setIndex(index.getIndex()+ Integer.BYTES); 
+		index.setIndex(index.getIndex() + Integer.BYTES);
 
 	}
 
@@ -118,14 +125,13 @@ public class Person {
 
 		for (int i = 0; i < Character.BYTES; i++) {
 
-			stream[index.getIndex()+ i] = (byte) ((c % SIZE_OF_BYTE) - SIGN_BYTE);
-			
+			stream[index.getIndex() + i] = (byte) ((c % SIZE_OF_BYTE) - SIGN_BYTE);
 
 			c /= SIZE_OF_BYTE;
 
 		}
-//w00t
-		index.setIndex(index.getIndex()+ Character.BYTES); 
+		// w00t
+		index.setIndex(index.getIndex() + Character.BYTES);
 
 	}
 
@@ -158,8 +164,8 @@ public class Person {
 		long gz = fetchLongFromStream(stream, index);
 		Calendar cal = fetchCalendarFromStream(stream, index);
 		String s = fetchStringFromStream(stream, index);
-		
-return new Person(s, cal, gz);
+
+		return new Person(s, cal, gz);
 	}
 
 	private static Calendar fetchCalendarFromStream(byte[] stream, Pointer index) {
@@ -171,7 +177,7 @@ return new Person(s, cal, gz);
 		for (int i = 0; i < date.length; i++) {
 
 			date[i] = fetchIntegerFromStream(stream, index);
-		
+
 		}
 
 		cal.set(date[0], date[1], date[2]);
@@ -196,7 +202,7 @@ return new Person(s, cal, gz);
 
 		}
 
-		index.setIndex(index.getIndex()+ Integer.BYTES); 
+		index.setIndex(index.getIndex() + Integer.BYTES);
 
 		return val;
 
@@ -216,7 +222,7 @@ return new Person(s, cal, gz);
 
 		}
 
-		index.setIndex(index.getIndex()+Long.BYTES);
+		index.setIndex(index.getIndex() + Long.BYTES);
 
 		return val;
 
@@ -251,7 +257,7 @@ return new Person(s, cal, gz);
 
 		}
 
-		index.setIndex(index.getIndex()+Character.BYTES);
+		index.setIndex(index.getIndex() + Character.BYTES);
 
 		return c;
 
