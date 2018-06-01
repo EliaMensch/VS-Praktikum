@@ -46,8 +46,8 @@ public class Main22_1 {
 				
 			}
 			
-			System.out.println(bi);
-			System.out.println(bi.mod(new BigInteger("" + server.size())).intValue());
+//			System.out.println(bi);
+//			System.out.println(bi.mod(new BigInteger("" + server.size())).intValue());
 
 			modulusList.put(resources.get(i), server.get(bi.mod(new BigInteger("" + server.size())).intValue()));
 
