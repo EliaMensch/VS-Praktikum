@@ -1,5 +1,6 @@
 package uebung2_2;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -22,6 +23,8 @@ public class Main22_1 {
 		resources.add("10af8b96-bf4a-4567-9cf4-56646cfefb23");
 		resources.add("cb4c2299-be2b-4673-ae76-0e98d1539833");
 		resources.add("c01c429b-5a55-4930-be48-8b0e2ae4db5d");
+		
+		final String CHARBITS = "65536";
 
 		ArrayList<String> server = new ArrayList<String>();
 
@@ -32,8 +35,21 @@ public class Main22_1 {
 		LinkedHashMap<String, String> modulusList = new LinkedHashMap<String, String>();
 
 		for (int i = 0; i < resources.size(); i++) {
+			
+			BigInteger bi = new BigInteger("0");
+			
+			for (int j = 0; j < resources.get(i).length(); j++) {
+				
+				bi = bi.multiply(new BigInteger(CHARBITS));
+				int c = resources.get(i).charAt(j);
+				bi = bi.add(new BigInteger("" + c));
+				
+			}
+			
+			System.out.println(bi);
+			System.out.println(bi.mod(new BigInteger("" + server.size())).intValue());
 
-			modulusList.put(resources.get(i), server.get(i % server.size()));
+			modulusList.put(resources.get(i), server.get(bi.mod(new BigInteger("" + server.size())).intValue()));
 
 		}
 
